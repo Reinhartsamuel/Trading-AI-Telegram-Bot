@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1770481864877,
+      "tag": "0000_same_shard",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1770489449517,
+      "tag": "0001_bent_union_jack",
+      "breakpoints": true
+    }
+  ]
+}
