@@ -3,7 +3,9 @@ import postgres from "postgres";
 import { config } from "@/config/env";
 import * as schema from "./schema";
 
-let db: ReturnType<typeof drizzle> | null = null;
+type Database = ReturnType<typeof drizzle<typeof schema>>;
+
+let db: Database | null = null;
 
 export async function initializeDatabase() {
   if (db) return db;
@@ -13,7 +15,7 @@ export async function initializeDatabase() {
     idle_timeout: 30,
   });
 
-  db = drizzle(sql, { schema });
+  db = drizzle(sql, { schema }) as Database;
 
   try {
     // Test connection
@@ -27,7 +29,7 @@ export async function initializeDatabase() {
   return db;
 }
 
-export function getDatabase() {
+export function getDatabase(): Database {
   if (!db) {
     throw new Error("Database not initialized. Call initializeDatabase() first.");
   }

@@ -46,7 +46,11 @@ export async function fetchKlines(
       );
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid Binance API response: expected array");
+    }
 
     // Parse Binance response format
     const candles: Candle[] = data.map(

@@ -1,6 +1,6 @@
 import { getDatabase } from "@/db/postgres";
 import { subscriptions } from "@/db/schema";
-import { eq, gt } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("SubscriptionService");
@@ -14,16 +14,11 @@ export async function checkSubscription(userId: string): Promise<boolean> {
 
     log.debug(`Checking subscription for user ${userId}...`);
 
-    const sub = await (db.query.subscriptions as any).findFirst({
-      where: (subsTable: any, { eq: eqFunc, gt: gtFunc, and: andFunc }: any) =>
-        andFunc(
-          eqFunc(subsTable.userId, userId),
-          eqFunc(subsTable.status, "active"),
-          gtFunc(subsTable.expiresAt, new Date())
-        ),
+    const sub = await db.query.subscriptions.findFirst({
+      where: eq(subscriptions.userId, userId),
     });
 
-    const result = !!sub;
+    const result = !!sub && sub.status === "active" && (!sub.expiresAt || sub.expiresAt > new Date());
     log.debug({ userId, hasSubscription: result }, "Subscription check completed");
     return result;
   } catch (error) {
@@ -40,9 +35,8 @@ export async function getSubscription(userId: string) {
   try {
     const db = getDatabase();
 
-    const sub = await (db.query.subscriptions as any).findFirst({
-      where: (subsTable: any, { eq: eqFunc }: any) =>
-        eqFunc(subsTable.userId, userId),
+    const sub = await db.query.subscriptions.findFirst({
+      where: eq(subscriptions.userId, userId),
     });
 
     return sub;

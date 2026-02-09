@@ -53,8 +53,8 @@ async function ensureUserExists(userId: string): Promise<void> {
   try {
     const db = getDatabase();
 
-    const existing = await (db.query.users as any).findFirst({
-      where: (usersTable: any, { eq: eqFunc }: any) => eqFunc(usersTable.id, userId),
+    const existing = await db.query.users.findFirst({
+      where: eq(users.id, userId),
     });
 
     if (!existing) {
@@ -77,7 +77,7 @@ export async function getJob(jobId: string) {
   try {
     const db = getDatabase();
 
-    const job = await (db.query.signalJobs as any).findFirst({
+    const job = await db.query.signalJobs.findFirst({
       where: eq(signalJobs.id, jobId),
       with: {
         results: true,
@@ -163,10 +163,9 @@ export async function getUserJobs(userId: string, limit: number = 10) {
   try {
     const db = getDatabase();
 
-    return await (db.query.signalJobs as any).findMany({
+    return await db.query.signalJobs.findMany({
       where: eq(signalJobs.userId, userId),
       limit,
-      orderBy: (jobsTable: any, { desc: descFunc }: any) => descFunc(jobsTable.createdAt),
       with: {
         results: true,
       },
