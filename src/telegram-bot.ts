@@ -15,21 +15,29 @@ async function main() {
       throw new Error("TELEGRAM_BOT_TOKEN environment variable is not set");
     }
 
-    // Initialize database (for future user storage)
+    log.info(`Bot token: ${config.TELEGRAM_BOT_TOKEN.substring(0, 10)}...`);
+
+    // Initialize database
     log.info("Connecting to database...");
     await initializeDatabase();
+    log.info("✓ Database connected");
 
-    // Initialize Redis (for rate limiting, sessions)
+    // Initialize Redis
     log.info("Connecting to Redis...");
     initializeRedis();
+    log.info("✓ Redis initialized");
 
     // Start bot
     log.info("Starting Telegram bot...");
-    await startTelegramBot();
+    startTelegramBot().catch((error: any) => {
+      log.error({ error }, "Bot startup error");
+      process.exit(1);
+    });
 
-    log.info("✓ Telegram bot process started successfully");
+    log.info("✓ Telegram bot process started");
   } catch (error) {
-    log.error({ error }, "Failed to start Telegram bot");
+    log.error({ error }, "Fatal: Failed to initialize Telegram bot");
+    console.error(error);
     process.exit(1);
   }
 }

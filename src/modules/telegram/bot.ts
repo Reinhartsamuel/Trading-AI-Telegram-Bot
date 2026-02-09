@@ -1,4 +1,5 @@
-import { Bot, session } from "grammy";
+import { Bot, session, webhookCallback } from "grammy";
+import { Hono } from "hono";
 import { config } from "@/config/env";
 import { createLogger } from "@/utils/logger";
 import { TradingAPIClient } from "./api-client";
@@ -96,14 +97,41 @@ export async function initializeTelegramBot() {
   return bot;
 }
 
-export async function startTelegramBot() {
-  const bot = await initializeTelegramBot();
+let botInstance: Bot<Context> | null = null;
 
-  log.info("Starting Telegram bot...");
-  await bot.start({
-    allowed_updates: ["message", "callback_query"],
-    drop_pending_updates: true,
-  });
+export async function startTelegramBot(): Promise<void> {
+  try {
+    botInstance = await initializeTelegramBot();
 
-  log.info("✓ Telegram bot running");
+    log.info("Starting Telegram bot (polling mode)...");
+
+    // Use polling mode
+    botInstance.start({
+      allowed_updates: ["message", "callback_query"],
+      drop_pending_updates: true,
+      onStart: (botInfo) => {
+        log.info({ botId: botInfo.id, username: botInfo.username }, "✓ Telegram bot started successfully");
+        log.info(`Bot @${botInfo.username} is listening for updates...`);
+      },
+    }).catch((error: any) => {
+      log.error({ error: String(error) }, "Bot polling error - restarting");
+      // Restart polling after delay
+      setTimeout(() => {
+        log.info("Attempting to restart bot polling...");
+        startTelegramBot().catch((e) => {
+          log.error({ error: e }, "Failed to restart bot");
+        });
+      }, 5000);
+    });
+  } catch (error) {
+    log.error({ error }, "Failed to initialize Telegram bot");
+    throw error;
+  }
+}
+
+export function getTelegramBot(): Bot<Context> {
+  if (!botInstance) {
+    throw new Error("Bot not initialized. Call startTelegramBot() first.");
+  }
+  return botInstance;
 }
