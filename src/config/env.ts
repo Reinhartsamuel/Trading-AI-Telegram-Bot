@@ -34,7 +34,15 @@ const envSchema = z.object({
 
   // Telegram Bot
   TELEGRAM_BOT_TOKEN: z.string().optional(),
-  API_BASE_URL: z.string().url().default("http://localhost:3000"),
+  API_BASE_URL : z.string().transform((val, ctx) => {
+  try {
+    // already a full URL
+    return new URL(val).toString();
+  } catch {
+    // treat as internal hostname
+    return new URL(`http://${val}`).toString();
+  }
+}).default("http://localhost:3000"),
   TELEGRAM_POLLING_INTERVAL: z.coerce.number().default(5000),
   TELEGRAM_MAX_POLL_ATTEMPTS: z.coerce.number().default(30),
 });
