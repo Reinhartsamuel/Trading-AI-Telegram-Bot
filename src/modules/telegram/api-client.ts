@@ -18,6 +18,8 @@ export class TradingAPIClient {
     params: SignalParams
   ): Promise<{ jobId: string }> {
     try {
+      log.info({ baseURL: this.baseURL, pair: params.pair }, "Creating signal request");
+
       const response = await fetch(`${this.baseURL}/signal`, {
         method: "POST",
         headers: {
@@ -33,8 +35,18 @@ export class TradingAPIClient {
       });
 
       if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unable to read error");
+        log.error(
+          {
+            status: response.status,
+            statusText: response.statusText,
+            errorBody: errorText,
+            url: `${this.baseURL}/signal`
+          },
+          "API returned error"
+        );
         throw new Error(
-          `API error: ${response.status} ${response.statusText}`
+          `API error: ${response.status} ${response.statusText} - ${errorText}`
         );
       }
 
@@ -42,7 +54,11 @@ export class TradingAPIClient {
       log.debug({ jobId: data.jobId, pair: params.pair }, "Signal created");
       return data;
     } catch (error) {
-      log.error({ error, params }, "Failed to create signal");
+      log.error({
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        params
+      }, "Failed to create signal");
       throw error;
     }
   }

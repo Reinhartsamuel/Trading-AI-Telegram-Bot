@@ -555,15 +555,20 @@ async function executeSignalCreation(
     if (!pair) missing.push("pair");
     if (!holding) missing.push("holding");
     if (!risk) missing.push("risk");
-    
+
     log.warn({ pair, holding, risk, missing, flowStep: ctx.session.flowStep }, "Missing parameters");
-    
+
     await ctx.answerCallbackQuery({
       text: `❌ Missing: ${missing.join(", ")}`,
       show_alert: true,
     });
     return;
   }
+
+  // Answer callback query immediately to prevent timeout
+  await ctx.answerCallbackQuery({ text: "⏳ Processing signal..." }).catch(() => {
+    // Ignore if already expired
+  });
 
   ctx.session.flowStep = "processing";
 
@@ -665,6 +670,4 @@ async function executeSignalCreation(
       "Signal creation failed"
     );
   }
-
-  await ctx.answerCallbackQuery();
 }
