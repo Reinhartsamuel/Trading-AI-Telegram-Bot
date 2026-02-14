@@ -10,6 +10,9 @@ import {
   getSignal,
   healthCheck,
 } from "@/modules/signal/signal.controller";
+import {
+  createOrder
+} from "@/modules/order/order.controller";
 import { authMiddleware, rateLimitMiddleware } from "@/modules/auth/auth.middleware";
 
 const log = createLogger("Server");
@@ -41,6 +44,8 @@ app.use(rateLimitMiddleware);
 app.get("/health", healthCheck);
 app.post("/signal", createSignal);
 app.get("/signal/:jobId", getSignal);
+app.post("/order",createOrder)
+// app.post("/webhook-orderonline", )
 
 // 404 handler
 app.notFound((ctx) => {

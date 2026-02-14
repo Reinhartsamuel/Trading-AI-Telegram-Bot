@@ -24,6 +24,26 @@ export const usersRelations = relations(users, ({ many }) => ({
   signalJobs: many(signalJobs),
 }));
 
+export const orders = pgTable("orders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  // userId: text("user_id")
+  //   .notNull()
+  //   .references(() => users.id),
+  telegramId: text("telegram_id").notNull(), // Telegram user ID
+  submissionId:text("submission_id"),
+  paymentStatus:text("payment_status").default("UNPAID"),
+  plan:text("plan"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+
+export const webhooks = pgTable("webhooks", {
+  rawWebhook: jsonb("raw_webhook"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 // Subscriptions table
 export const subscriptions = pgTable(
   "subscriptions",

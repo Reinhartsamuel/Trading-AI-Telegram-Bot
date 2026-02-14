@@ -1,4 +1,5 @@
 import { Context as GrammyContext, SessionFlavor } from "grammy";
+import { UserData } from "@/modules/user/user.service";
 
 export interface TelegramSessionData {
   // Legacy fields
@@ -26,7 +27,9 @@ export interface TelegramSessionData {
   processingJobId?: string;
 }
 
-export type Context = GrammyContext & SessionFlavor<TelegramSessionData>;
+export type Context = GrammyContext & SessionFlavor<TelegramSessionData> & {
+  userData?: UserData;
+};
 
 export interface SignalParams {
   pair: string;

@@ -7,7 +7,16 @@ const log = createLogger("StartCommand");
 export async function handleStartCommand(ctx: Context) {
   try {
     const userId = ctx.from?.id;
-    log.info({ userId }, "User started bot");
+    const userData = ctx.userData;
+
+    log.info(
+      {
+        telegramId: userId,
+        userId: userData?.id,
+        isNewUser: userData ? true : false
+      },
+      "User started bot"
+    );
 
     const message = `
 👋 *Welcome to Trading Signal Bot!*

@@ -17,6 +17,9 @@ import { handlePhotoCommand } from "./handlers/photo";
 import { handleCallbackQuery } from "./handlers/callback";
 import { handleTickerInput, handleGeneralText } from "./handlers/text";
 
+// Middleware
+import { userMiddleware } from "./middleware/user.middleware";
+
 const log = createLogger("TelegramBot");
 
 export async function initializeTelegramBot() {
@@ -37,6 +40,9 @@ export async function initializeTelegramBot() {
 
   // Initialize API client
   const apiClient = new TradingAPIClient(config.API_BASE_URL);
+
+  // User middleware - ensure user exists in database
+  bot.use(userMiddleware);
 
   // Middleware for logging
   bot.use(async (ctx, next) => {
@@ -127,6 +133,15 @@ export async function startTelegramBot(): Promise<void> {
     log.error({ error }, "Failed to initialize Telegram bot");
     throw error;
   }
+}
+
+export async function sendNotification(
+  userId: number,
+  message: string,
+  options?: { parse_mode?: "Markdown" | "HTML" }
+) {
+  const botInstance = await initializeTelegramBot();
+  return await botInstance.api.sendMessage(userId, message, options);
 }
 
 export function getTelegramBot(): Bot<Context> {
